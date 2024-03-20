@@ -1,16 +1,13 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:attendance_management_system/widgets/custom_button.dart';
-import 'package:attendance_management_system/widgets/custom_toast_message.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../utils/colors.dart';
 import '../../utils/responsive_text.dart';
+import '../../widgets/custom_button.dart';
+import '../../widgets/custom_toast_message.dart';
 
 class AttendanceReportScreen extends StatefulWidget {
   const AttendanceReportScreen({super.key});
@@ -34,20 +31,42 @@ class _AttendanceReportScreenState extends State<AttendanceReportScreen> {
   Future<void> _generateReport(
       BuildContext context, DateTime fromDate, DateTime toDate) async {
     try {
+      final firebaseFromDate = Timestamp.fromDate(fromDate);
+      final firebaseToDate = Timestamp.fromDate(toDate);
+
+      // Format from and to dates
+      final formattedFromDate = DateFormat('MMM d, yyyy').format(fromDate);
+      final formattedToDate = DateFormat('MMM d, yyyy').format(toDate);
+
       final QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('attendance_records')
-          .where('dateTime', isGreaterThanOrEqualTo: fromDate)
-          .where('dateTime', isLessThanOrEqualTo: toDate)
-          .get();
+          .get(); // Get all documents (optimize later if needed)
 
-      setState(() {
-        attendanceList = snapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList();
-      });
+      List<Map<String, dynamic>> reportList = [];
+
+      for (var doc in snapshot.docs) {
+        final docData = doc.data() as Map<String, dynamic>;
+        final recordDateTime = docData['dateTime'] as Timestamp;
+
+        if (recordDateTime.toDate().isAfter(firebaseFromDate.toDate()) &&
+            recordDateTime.toDate().isBefore(
+                firebaseToDate.toDate().add(const Duration(days: 1)))) {
+          // Date falls within the specified range, add record to the list
+          final username = docData['username'];
+          final status = docData['status'];
+          final formattedDate =
+              DateFormat('MMM d, yyyy').format(recordDateTime.toDate());
+
+          reportList.add({
+            'username': username,
+            'date': formattedDate,
+            'status': status,
+          });
+        }
+      }
+      attendanceList = reportList;
     } catch (e) {
       toastMessage(context, 'Error generating report: $e');
-      // Handle error
     }
   }
 

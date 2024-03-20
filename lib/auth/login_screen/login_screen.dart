@@ -246,7 +246,7 @@ class _UserLoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           InkWell(
                             onTap: () {
-                              Navigator.push(
+                              Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const SignUpScreen(),

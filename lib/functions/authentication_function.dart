@@ -1,12 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:attendance_management_system/admin_panel/admin_bottom_bar/admin_bottom_bar_screen.dart';
 import 'package:attendance_management_system/user_pannel/bottom_bar/bottom_bar.dart';
 import 'package:attendance_management_system/widgets/custom_toast_message.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../admin_panel/home/admin_home_screen.dart';
 import '../get_started/get_started_screen.dart';
 
 //! Creating a function to sign in the user
@@ -26,7 +26,7 @@ Future<void> signInUser(
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const AdminHomeScreen(),
+            builder: (context) => const AdminBottomBar(),
           ),
         ).onError((error, stackTrace) {
           toastMessage(context, error.toString());
